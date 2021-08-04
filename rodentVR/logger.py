@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import os
-from constants import *
+from globals import *
 
 class Logger:
     TIME = None
@@ -14,7 +14,7 @@ class Logger:
 
 
     def __init__(self):
-        
+
         #mkdir timestamp, add experiment information
         self.DIR = f"{LOG_PATH}/{self.TIMESTAMP}"
         try:
