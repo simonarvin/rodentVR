@@ -1,0 +1,18 @@
+{
+  "base" : {
+    "LEVEL_EXT" : "png",
+    "LEVEL_ID" : "test",
+    "MAX_LEVEL_LAYER" : 10,
+    "SCALAR" : 1,
+    "FOV" : 120,
+    "VELOCITY_SCALAR" : 3,
+    "PLAYER_ELEVATION" : 0.4,
+    "FRICTION" : 0.5,
+    "BLOCK_HEIGHT" : 4
+},
+  "default_grating" : {
+    "square" : true,
+    "sf"  : 1,
+    "angle" : 0
+  }
+}
