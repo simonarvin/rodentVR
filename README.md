@@ -18,6 +18,38 @@ rodentVR is a Python 3-based virtual reality system tailored specifically to neu
 - [Authors](#authors)
 - [Examples](https://github.com/simonarvin/eyeloop/blob/master/examples)
 
+## How it works ##
+Placeholder.
+
+## Getting started ##
+
+### Installation ###
+Install rodentVR by cloning the repository:
+```
+git clone https://github.com/simonarvin/rodentVR.git
+```
+
+>Dependencies: ```python -m pip install -r requirements.txt```
+
+>Using pip:
+> ```pip install .```
+
+You may want to use a Conda or Python virtual environment when
+installing `rodentVR`, to avoid mixing up with your system dependencies.
+
+>Using pip and a virtual environment:
+
+> ```python -m venv venv```
+
+> ```source venv/bin/activate```
+
+> ```(venv) pip install .```
+
+## Known issues ##
+None yet.
+
+## License ##
+This project is licensed under the GNU General Public License v3.0. Note that the software is provided "as is", without warranty of any kind, express or implied.
 
 ## Authors ##
 
