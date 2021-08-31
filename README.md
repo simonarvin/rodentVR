@@ -9,22 +9,31 @@ rodentVR is a Python 3-based virtual reality system tailored specifically to neu
 ## Features ##
 - [x] Flexible, modular, readable
 - [x] Open-source, all Python 3
-- [x] Works on any platform
+- [x] Works on Windows and Linux.
 - [x] Actively maintained
 
 ## Overview ##
 - [How it works](#how-it-works)
 - [Getting started](#getting-started)
+- [Your first experiment](#your-first-experiment)
 - [Authors](#authors)
 - [Examples](https://github.com/simonarvin/eyeloop/blob/master/examples)
 
 ## How it works ##
-Placeholder.
+rodentVR uses the *Ursina* game engine to allow researchers to design 3D experiments more easily and flexibily: 
+
+**Experiments are generated using pixel-maps.**
+- Users can easily design and modify 3d environments by drawing pixels on a canvas, e.g., in Microsoft Paint.
+- Pixels are color-coded `(0-255, 0-255, 0-255)`, to produce distinct 3d objects, e.g., *walls, gratings, events*.
+> *Gratings* are customizable by *spatial frequency* and *angle*.
+>
+> *Events* can run any custom user-code. Default *Event* types are available, e.g., *Stop Events*.
+- Layers of pixels can be stacked to produce multi-level 3d environments, e.g., containing tall landmarks.
 
 ## Getting started ##
 
 ### Installation ###
-Install rodentVR by cloning the repository:
+Install `rodentVR` by cloning the repository:
 ```
 git clone https://github.com/simonarvin/rodentVR.git
 ```
@@ -44,6 +53,9 @@ installing `rodentVR`, to avoid mixing up with your system dependencies.
 > ```source venv/bin/activate```
 
 > ```(venv) pip install .```
+
+## Your first experiment ##
+Placeholder
 
 ## Known issues ##
 None yet.
