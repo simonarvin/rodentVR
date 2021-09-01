@@ -122,7 +122,7 @@ class VR:
         ground_parent = Entity(
         model=Mesh(vertices=[], uvs=[]),
         color = color.gray,
-        texture = load_texture(name="grass.png", path=Path(self.TEXTURE_PATH}))
+        texture = load_texture(name="grass.png", path=Path(self.TEXTURE_PATH))
         )
         cube = load_model('cube')
 
