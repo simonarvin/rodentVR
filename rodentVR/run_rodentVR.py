@@ -10,9 +10,9 @@ import cv2
 import json
 #from constants import * #initialized by __init__.py
 
-from globals import *
-from rules import *
-from utilities import Grating, Capture, rectangles
+from rodentVR.globals import *
+from rodentVR.rules.rules import *
+from rodentVR.utilities import Grating, Capture, rectangles
 
 DEBUG = True
 
@@ -122,6 +122,7 @@ class VR:
         color = color.gray,
         texture = f"{self.TEXTURE_PATH}grass"
         )
+        print(f"{self.TEXTURE_PATH}grass")
 
         cube = load_model('cube')
 
@@ -130,7 +131,7 @@ class VR:
                 ground_parent.model.vertices += [Vec3(*e) + Vec3(j * self.GROUND_SIZE, 0,  i * self.GROUND_SIZE) for e in cube.vertices] # copy the quad model, but offset it with Vec3(x+.5,y+.5,0)
                 ground_parent.model.uvs += cube.uvs
 
-        ground_parent.texture.filtering = None
+        #ground_parent.texture.filtering = None
         ground_parent.model.generate()
 
 
@@ -299,10 +300,13 @@ class VR:
 
         return hit
 
-if __name__ == "__main__":
+def main():
     vr = VR()
     vr.load_parameters("example_1")
     vr.load_level()
 
     vr.run()
     LOGGER.terminate()
+
+if __name__ == "__main__":
+    main()

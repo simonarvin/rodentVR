@@ -7,10 +7,8 @@ try:
 except:
     pass
 
-BUFFER_SIZE = 2**12 #Logger
-
-from logger import Logger
-LOGGER = Logger()
+from rodentVR import logger
+LOGGER = logger.Logger(LOG_PATH)
 
 PLAYER = []
 

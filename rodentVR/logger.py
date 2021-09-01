@@ -1,19 +1,20 @@
 import time
 import numpy as np
 import os
-from globals import *
+#from globals import *
 
 class Logger:
+
     TIME = None
     START = None
-
+    BUFFER_SIZE = 2**12 #Logger
     buffer = np.zeros(BUFFER_SIZE + 1, dtype=dict)
     index = 0
     pack = 0
     TIMESTAMP = time.strftime('%m%d%y_%H%M%S')
 
 
-    def __init__(self):
+    def __init__(self, LOG_PATH):
 
         #mkdir timestamp, add experiment information
         self.DIR = f"{LOG_PATH}/{self.TIMESTAMP}"
@@ -37,7 +38,7 @@ class Logger:
     def clear(self):
         index = 0
         #todo: if buffer empty, save it
-        buffer = np.zeros(BUFFER_SIZE, dtype=dict)
+        buffer = np.zeros(self.BUFFER_SIZE, dtype=dict)
 
     def save(self):
         try:
@@ -55,7 +56,7 @@ class Logger:
         print("log terminated")
 
     def increment(self):
-        if self.index == BUFFER_SIZE:
+        if self.index == self.BUFFER_SIZE:
             self.index = 0
             self.save()
         else:

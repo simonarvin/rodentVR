@@ -3,15 +3,13 @@ from PIL import Image
 import os
 import cv2
 
-
-
 PARENT_BASE_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 TEXTURE_PATH = f"{PARENT_BASE_PATH}/textures/gratings/"
 
 import sys
 sys.path.append(f"{PARENT_BASE_PATH}")
 
-from globals import *
+#from globals import *
 
 class Grating:
 
@@ -23,6 +21,10 @@ class Grating:
     }
 
     def __init__(self, sf = 1, angle = 0, square = False, BLOCK_HEIGHT = None, tile_size = 2**8):
+        print("MAKING FOLDERaaaaaaaaaa")
+        if not os.path.exists(TEXTURE_PATH):
+            print("MAKING FOLDER")
+            os.makedirs(TEXTURE_PATH)
 
         angle = str(int(angle))
 
@@ -84,7 +86,8 @@ class Grating:
 
         self.img = grating_canvas.astype(np.uint8)
 
-        Image.fromarray(self.img, 'RGB').save(texture_path)
+
+        #Image.fromarray(self.img, 'RGB').save(texture_path)
 
 
     def texture(self):

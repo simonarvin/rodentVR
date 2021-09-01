@@ -1,6 +1,6 @@
 import time
 import random
-from globals import *
+from rodentVR.globals import *
 from ursina import *
 
 class Rule:

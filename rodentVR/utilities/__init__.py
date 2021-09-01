@@ -1,5 +1,5 @@
-from utilities.capture import Capture
-from utilities.gratings import Grating
-from utilities import rectangles
+from rodentVR.utilities.capture import Capture
+from rodentVR.utilities.gratings import Grating
+from rodentVR.utilities import rectangles
 
 __all__ = ["Capture", "Grating", "rectangles"]
