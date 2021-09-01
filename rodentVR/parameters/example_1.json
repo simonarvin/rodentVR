@@ -6,7 +6,7 @@
   "blocks" : {
     "0" : {
       "type" : "sine",
-      "square" : false,
+      "square" : true,
       "sf"  : 1,
       "angle" : 0
     },
@@ -29,7 +29,7 @@
       "limit" : 5,
        "stimuli" : {
          "1": {"id" : "reward", "exec" : {
-           "hit" : "print('00')\nif PLAYER[0].rotation[1] == 270: (PLAYER[0].animate_rotation(Vec3(0, 360, 0), .2), invoke(lambda:PLAYER[0].animate_rotation(Vec3(0, 0, 0), 0), delay=.2))"
+           "hit" : "print('00')\nif PLAYER[0].rotation[1] == 270: (PLAYER[0].animate_rotation(Vec3(0, 360, 0), .2), invoke(lambda:PLAYER[0].animate_rotation(Vec3(0, 0, 0), 0), delay=.3))"
          }
        }
        }
@@ -38,7 +38,7 @@
       "limit" : 5,
        "stimuli" : {
          "1": {"id" : "reward", "exec" : {
-           "hit" : "print('11')\nif PLAYER[0].rotation[1] == 0: PLAYER[0].animate_rotation(Vec3(0, 90, 0), .2)"
+           "hit" : "print('11', PLAYER[0].rotation[1])\nif PLAYER[0].rotation[1] == 0: PLAYER[0].animate_rotation(Vec3(0, 90, 0), .2)"
          }
        }
        }
