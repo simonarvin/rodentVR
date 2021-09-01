@@ -39,7 +39,7 @@ git clone https://github.com/simonarvin/rodentVR.git
 ```
 
 >Dependencies: ```python -m pip install -r requirements.txt```
-
+>
 >Using pip:
 > ```pip install .```
 
@@ -47,11 +47,11 @@ You may want to use a Conda or Python virtual environment when
 installing `rodentVR`, to avoid mixing up with your system dependencies.
 
 >Using pip and a virtual environment:
-
+>
 > ```python -m venv venv```
-
+>
 > ```source venv/bin/activate```
-
+>
 > ```(venv) pip install .```
 
 ## Your first experiment ##
