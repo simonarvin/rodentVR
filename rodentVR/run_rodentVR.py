@@ -13,6 +13,7 @@ import json
 from rodentVR.globals import *
 from rodentVR.rules.rules import *
 from rodentVR.utilities import Grating, Capture, rectangles
+from pathlib import Path
 
 DEBUG = True
 
@@ -63,6 +64,7 @@ class VR:
 
         self.LEVEL_PATH = f"{BASE_PATH}/levels/{self.LEVEL_ID}/"
         self.TEXTURE_PATH = f"{BASE_PATH}/textures/"
+        print("hej", self.TEXTURE_PATH)
         self.CAPTURE = Capture(self.LEVEL_PATH)
 
         self.BLOCK_SIZE = (self.SCALAR, self.SCALAR * self.BLOCK_HEIGHT, self.SCALAR)
@@ -120,10 +122,8 @@ class VR:
         ground_parent = Entity(
         model=Mesh(vertices=[], uvs=[]),
         color = color.gray,
-        texture = f"{self.TEXTURE_PATH}grass"
+        texture = load_texture(name="grass.png", path=Path(self.TEXTURE_PATH}))
         )
-        print(f"{self.TEXTURE_PATH}grass")
-
         cube = load_model('cube')
 
         for i in range(int(self.SCALAR * self.LEVEL_SIZE[0]/self.GROUND_SIZE) + 2):
@@ -155,7 +155,8 @@ class VR:
                         except IndexError:
                             grating = self.DEFAULT_GRATING.elongate(max(h, w))
 
-                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white,texture=grating, position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+                        texture = load_texture(name = grating[0], path = Path(grating[1]))
+                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
 
 
             if len(PLAYER) == 0:
@@ -178,8 +179,8 @@ class VR:
                 items = np.where(np.all(layer == identifier, axis=-1))
 
                 for item_index in range(items[0].shape[0]):
-
-                    e = Entity(model=Cube(), scale = self.ITEM_SIZE,texture=load_texture(f"{self.TEXTURE_PATH}cheese"), position = (self.SCALAR *  items[1][item_index], self.SCALAR * item_layer_index * self.BLOCK_HEIGHT + self.GROUND_SIZE/2 + self.ITEM_SIZE[1]/2, self.SCALAR * items[0][item_index]), collider = 'box', shader=shader_)
+                    texture = load_texture(name="cheese.jpg", path=Path(self.TEXTURE_PATH))
+                    e = Entity(model=Cube(), scale = self.ITEM_SIZE,texture=texture, position = (self.SCALAR *  items[1][item_index], self.SCALAR * item_layer_index * self.BLOCK_HEIGHT + self.GROUND_SIZE/2 + self.ITEM_SIZE[1]/2, self.SCALAR * items[0][item_index]), collider = 'box', shader=shader_)
 
 
         for rule_layer_index, layer in enumerate(self.RULE_LAYERS):

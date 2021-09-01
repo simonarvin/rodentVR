@@ -21,9 +21,8 @@ class Grating:
     }
 
     def __init__(self, sf = 1, angle = 0, square = False, BLOCK_HEIGHT = None, tile_size = 2**8):
-        print("MAKING FOLDERaaaaaaaaaa")
+
         if not os.path.exists(TEXTURE_PATH):
-            print("MAKING FOLDER")
             os.makedirs(TEXTURE_PATH)
 
         angle = str(int(angle))
@@ -94,11 +93,11 @@ class Grating:
         return self.texture_
 
     def elongate(self, h:int): #elongates the texture to fit model uvs
-
-        output = f"{TEXTURE_PATH}grating_sf{self.raw_sf}_deg{self.angle}_sq{self.square}_e{h}.png"
+        file_name =f"grating_sf{self.raw_sf}_deg{self.angle}_sq{self.square}_e{h}.png"
+        output = f"{TEXTURE_PATH}{file_name}"
         if os.path.isfile(output):
             print("elongated texture exists")
-            return output
+            return file_name, TEXTURE_PATH#output
 
         if self.remainder != 0:
             img = cv2.resize(np.array(self.img,dtype=np.uint8), None, fx = self.sf/(1 + self.remainder), fy=1)
@@ -106,7 +105,9 @@ class Grating:
             img = self.img
         elongated = np.hstack((img, ) * h)
         Image.fromarray(elongated, 'RGB').save(output)
-        return output
+
+        return file_name, TEXTURE_PATH#output
+        #return output
 
 
     def rotate(self, image, angle):
