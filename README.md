@@ -4,7 +4,7 @@
 <img src="https://github.com/simonarvin/rodentVR/blob/main/misc/graphics/rodentvr_title.svg"  width="400">
 </p>
 
-rodentVR is a Python 3-based virtual reality system tailored specifically to neuroscience research. This software is actively maintained: Users are encouraged to contribute to its development.
+`rodentVR` is a Python 3-based virtual reality system tailored specifically to neuroscience research. This software is actively maintained: Users are encouraged to contribute to its development.
 
 ## Features ##
 - [x] Flexible, modular, readable
@@ -20,7 +20,7 @@ rodentVR is a Python 3-based virtual reality system tailored specifically to neu
 - [Examples](https://github.com/simonarvin/eyeloop/blob/master/examples)
 
 ## How it works ##
-rodentVR uses the *Ursina* game engine to allow researchers to design 3D experiments more easily and flexibily: 
+`rodentVR` uses the *Ursina* game engine to allow researchers to design 3D experiments more easily and flexibily: 
 
 **Experiments are generated using pixel-maps.**
 - Users can easily design and modify 3d environments by drawing pixels on a canvas, e.g., in Microsoft Paint.
