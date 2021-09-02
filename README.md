@@ -17,7 +17,6 @@
 - [Getting started](#getting-started)
 - [Your first experiment](#your-first-experiment)
 - [Authors](#authors)
-- [Examples](https://github.com/simonarvin/eyeloop/blob/master/examples)
 
 ## How it works ##
 `rodentVR` uses the *Ursina* game engine to allow researchers to design 3D experiments more easily and flexibily: 
