@@ -66,10 +66,11 @@ This project is licensed under the GNU General Public License v3.0. Note that th
 ## Authors ##
 
 **Lead Developer:**
-Simon Arvin, sarv@dandrite.au.dk
 <p align="right">
     <img src="https://github.com/simonarvin/eyeloop/blob/master/misc/imgs/constant.svg?raw=true" align="right" height="180">
     </p>
+    
+Simon Arvin, sarv@dandrite.au.dk
 
 **Researchers:**
 
