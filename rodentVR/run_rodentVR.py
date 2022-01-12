@@ -17,7 +17,7 @@ from pathlib import Path
 
 DEBUG = True
 
-SCREENSHOT = False
+SCREENSHOT = True
 
 class VR:
 
@@ -208,6 +208,7 @@ class VR:
         self.RULE_ENTITIES = tuple(self.RULE_ENTITIES)
 
         if SCREENSHOT:
+            #self.CAPTURE.camera = camera
             saved_camera = camera.transform
             #tan(FOV/2) * 2/h = dist
             max_dim = max(self.LEVEL_SIZE)
@@ -218,16 +219,26 @@ class VR:
 
             camera.enabled=False
             camera.orthographic = True
-            #camera.rotation=Vec3(0,00,90)
-            invoke(Func(self.CAPTURE.snapshot), delay = 1)
-            Wait(1)
+            delay=1
+            invoke(Func(self.CAPTURE.snapshot), delay = delay) #left
 
+            invoke(setattr,camera,'rotation',Vec3(0,90,0),delay=3*delay)
+            #camera.rotation = Vec3(0,90,0)
+            invoke(Func(self.CAPTURE.snapshot), delay = 4*delay) #right
+
+            invoke(setattr,camera,'rotation',Vec3(90,0,0),delay=5*delay)
+            invoke(setattr,camera,'y',100, delay=5*delay)
+            invoke(Func(self.CAPTURE.snapshot), delay = 6*delay) #top-down
+
+            invoke(setattr,camera,'enabled',True, delay=7*delay)
+            invoke(setattr,camera,'orthographic',False, delay=7*delay)
+            invoke(setattr,camera,'transform',saved_camera, delay=7*delay)
             #camera.transform = Vec3(self.SCALAR * self.LEVEL_SIZE[1]//2, self.LEVEL_LAYER * self.BLOCK_HEIGHT * self.SCALAR + 1/(np.tan(np.radians(self.FOV/2)) * 2/(max_dim * self.SCALAR)), self.SCALAR * self.LEVEL_SIZE[0]//2 + 1), Vec3(90,rotate,0), Vec3(1,1,1)
             #Wait(.2)
             #invoke(Func(self.CAPTURE.snapshot), delay = 1)
             #camera.transform = Vec3(self.SCALAR * self.LEVEL_SIZE[1]//2 + 1/(np.tan(np.radians(self.FOV/2)) * 2/(max_dim * self.SCALAR)), (self.LEVEL_LAYER * self.BLOCK_HEIGHT * self.SCALAR)/2, self.SCALAR * self.LEVEL_SIZE[0]//2 + 1), Vec3(0,0,-180), Vec3(1,1,1)
 
-            camera.enabled = True
+            #camera.enabled = True
 
         LOGGER.start() #start logging
 
