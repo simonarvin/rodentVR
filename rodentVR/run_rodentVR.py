@@ -18,6 +18,10 @@ from pathlib import Path
 DEBUG = True
 
 SCREENSHOT = True
+"""
+todo:
+Omdan block walls til quads
+"""
 
 class VR:
 
@@ -35,9 +39,22 @@ class VR:
 
     def load_parameters(self, file = "default"):
         print(f"loading parameters '{file}'")
+        params = {}
+        try:
+            with open(f"{BASE_PATH}/parameters/{file}.json", "r") as f:
+                params = json.loads(f.read())
+        except FileNotFoundError:
+            pass
 
-        with open(f"{BASE_PATH}/parameters/{file}.json", "r") as f:
-            params = json.loads(f.read())
+        try:
+            params["base"]["LEVEL_ID"]
+        except:
+            params_add = {
+              "base" : {
+              "LEVEL_ID" : file}
+              }
+            params = {**params_add, **params}
+
 
         with open(f"{BASE_PATH}/parameters/default.json", "r") as f:
             #print(f.read())
@@ -64,7 +81,7 @@ class VR:
 
         self.LEVEL_PATH = f"{BASE_PATH}/levels/{self.LEVEL_ID}/"
         self.TEXTURE_PATH = f"{BASE_PATH}/textures/"
-        print("hej", self.TEXTURE_PATH)
+        #print("hej", self.TEXTURE_PATH)
         self.CAPTURE = Capture(self.LEVEL_PATH)
 
         self.BLOCK_SIZE = (self.SCALAR, self.SCALAR * self.BLOCK_HEIGHT, self.SCALAR)
@@ -75,18 +92,19 @@ class VR:
         self.DEFAULT_GRATING = Grating(**default_grating, BLOCK_HEIGHT = self.BLOCK_HEIGHT)
 
         #now, check for custom blocks
-        self.GRATINGS = []
+        self.GRATINGS = {}#[]
 
         try:
             block_params = params["blocks"]
+
             for (key, value) in block_params.items():
                 if value["type"] == "sine":
                     value = {**default_grating, **value}
-
-                    self.GRATINGS.append(Grating(sf = value["sf"], angle = value["angle"], square = value["square"], BLOCK_HEIGHT = self.BLOCK_HEIGHT))
+                    self.GRATINGS[str(key)] = Grating(sf = value["sf"], angle = value["angle"], square = value["square"], BLOCK_HEIGHT = self.BLOCK_HEIGHT)
+                    #self.GRATINGS.append(Grating(sf = value["sf"], angle = value["angle"], square = value["square"], BLOCK_HEIGHT = self.BLOCK_HEIGHT))
         except KeyError:
             block_params = None
-            pass #no custom blocks added
+            #pass #no custom blocks added
 
     def load_level(self):
         print(f"loading level '{self.LEVEL_ID}'")
@@ -148,15 +166,26 @@ class VR:
                     if "floor" == block_type:
                         e = Entity(model='cube',  scale = (self.FLOOR_SIZE[0] * w, self.FLOOR_SIZE[1], self.FLOOR_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.FLOOR_SIZE[1]/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
                     elif "block" == block_type:
-                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
                     elif "grating" == block_type:
+
                         try:
-                            grating = self.GRATINGS[(identifier[0] - 100)//10].elongate(max(h, w))
-                        except IndexError:
+                            grating_id = str((identifier[0] - 100)//10)
+                            grating = self.GRATINGS[grating_id].elongate(max(h, w))
+                        except KeyError:
                             grating = self.DEFAULT_GRATING.elongate(max(h, w))
 
                         texture = load_texture(name = grating[0], path = Path(grating[1]))
-                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+
+                        e = Entity(model='cube', scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+
+                        #e.model.uvs=list(e.model.uvs)
+
+                        #e.model.uvs[10]=(.2,.2)
+
+                        #e.model.generate()
+
+
 
 
             if len(PLAYER) == 0:
@@ -189,7 +218,7 @@ class VR:
                 rules_ = np.all(layer == identifier, axis=-1).astype(np.uint8)
                 #rects = rectangles.extract_rectangles(rules_.astype(int))
                 contours, _ = cv2.findContours(rules_, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                contours=sorted(contours, key=lambda x:cv2.boundingRect(x)[0])
+                contours = sorted(contours, key=lambda x:cv2.boundingRect(x)[0])
                 for ci, contour in enumerate(contours):
                     (x, y, w, h) = cv2.boundingRect(contour)
 
@@ -207,40 +236,38 @@ class VR:
 
         self.RULE_ENTITIES = tuple(self.RULE_ENTITIES)
 
+
         if SCREENSHOT:
-            #self.CAPTURE.camera = camera
-            saved_camera = camera.transform
-            #tan(FOV/2) * 2/h = dist
-            max_dim = max(self.LEVEL_SIZE)
-            if max_dim == self.LEVEL_SIZE[1]:
-                rotate = 0
-            else:
-                rotate = 90
-
-            camera.enabled=False
-            camera.orthographic = True
-            delay=1
-            invoke(Func(self.CAPTURE.snapshot), delay = delay) #left
-
-            invoke(setattr,camera,'rotation',Vec3(0,90,0),delay=3*delay)
-            #camera.rotation = Vec3(0,90,0)
-            invoke(Func(self.CAPTURE.snapshot), delay = 4*delay) #right
-
-            invoke(setattr,camera,'rotation',Vec3(90,0,0),delay=5*delay)
-            invoke(setattr,camera,'y',100, delay=5*delay)
-            invoke(Func(self.CAPTURE.snapshot), delay = 6*delay) #top-down
-
-            invoke(setattr,camera,'enabled',True, delay=7*delay)
-            invoke(setattr,camera,'orthographic',False, delay=7*delay)
-            invoke(setattr,camera,'transform',saved_camera, delay=7*delay)
-            #camera.transform = Vec3(self.SCALAR * self.LEVEL_SIZE[1]//2, self.LEVEL_LAYER * self.BLOCK_HEIGHT * self.SCALAR + 1/(np.tan(np.radians(self.FOV/2)) * 2/(max_dim * self.SCALAR)), self.SCALAR * self.LEVEL_SIZE[0]//2 + 1), Vec3(90,rotate,0), Vec3(1,1,1)
-            #Wait(.2)
-            #invoke(Func(self.CAPTURE.snapshot), delay = 1)
-            #camera.transform = Vec3(self.SCALAR * self.LEVEL_SIZE[1]//2 + 1/(np.tan(np.radians(self.FOV/2)) * 2/(max_dim * self.SCALAR)), (self.LEVEL_LAYER * self.BLOCK_HEIGHT * self.SCALAR)/2, self.SCALAR * self.LEVEL_SIZE[0]//2 + 1), Vec3(0,0,-180), Vec3(1,1,1)
-
-            #camera.enabled = True
+            self.take_screenshots()
 
         LOGGER.start() #start logging
+
+    def take_screenshots(self, delay = 1):
+        saved_camera = camera.transform
+        max_dim = max(self.LEVEL_SIZE)
+
+        if max_dim == self.LEVEL_SIZE[1]:
+            rotate = 0
+        else:
+            rotate = 90
+
+        camera.enabled=False
+        camera.orthographic = True
+
+        invoke(Func(self.CAPTURE.snapshot), delay = delay) #left
+
+        invoke(setattr,camera,'rotation',Vec3(0,90,0),delay=3*delay)
+        #camera.rotation = Vec3(0,90,0)
+        invoke(Func(self.CAPTURE.snapshot), delay = 4*delay) #right
+
+        invoke(setattr,camera,'rotation',Vec3(90,0,0),delay=5*delay)
+        invoke(setattr,camera,'y',100, delay=5*delay)
+        invoke(Func(self.CAPTURE.snapshot), delay = 6*delay) #top-down
+
+        invoke(setattr,camera,'enabled',True, delay=7*delay)
+        invoke(setattr,camera,'orthographic',False, delay=7*delay)
+        invoke(setattr,camera,'transform',saved_camera, delay=7*delay)
+
 
     def run(self):
         app = Ursina()
@@ -314,7 +341,7 @@ class VR:
 
 def main():
     vr = VR()
-    vr.load_parameters("example_1")
+    vr.load_parameters("example_2")
     vr.load_level()
 
     vr.run()
