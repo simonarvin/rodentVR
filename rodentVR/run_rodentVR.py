@@ -15,13 +15,16 @@ from rodentVR.rules.rules import *
 from rodentVR.utilities import Grating, Capture, rectangles
 from pathlib import Path
 
-DEBUG = True
-
-SCREENSHOT = True
 """
 todo:
-Omdan block walls til quads
+[ ] add mute-buttom (and remember)
+[ ] remember parameter-directory
 """
+
+DEBUG = False#True
+
+SCREENSHOT = False#True
+
 
 class VR:
 
@@ -29,7 +32,6 @@ class VR:
     RULE_LAYERS = []
     RULE_ENTITIES = []
 
-    SCREEN_DIMENSIONS = (1920 * 2, 1080)
     LEVEL_LAYER = 0
 
     LEVEL_SIZE = (-1)
@@ -37,12 +39,37 @@ class VR:
 
     CAPTURE = None
 
+    def clear(self):
+        self.LEVEL_LAYERS = []
+        self.RULE_LAYERS = []
+        self.RULE_ENTITIES = []
+
+        self.LEVEL_LAYER = 0
+
+        self.LEVEL_SIZE = (-1)
+        self.GROUND_SIZE = 1
+
+        self.CAPTURE = None
+
+        global PLAYER
+        PLAYER = []
+
+        global RULE_INDEX
+        RULE_INDEX = 0
+        camera.rotation = Vec3(0,0,0)
+
     def load_parameters(self, file = "default"):
         print(f"loading parameters '{file}'")
         params = {}
+        self.file = file
         try:
-            with open(f"{BASE_PATH}/parameters/{file}.json", "r") as f:
-                params = json.loads(f.read())
+            if "/" in file:
+                with open(file, "r") as f:
+                    params = json.loads(f.read())
+            else:
+                with open(f"{BASE_PATH}/parameters/{file}.json", "r") as f:
+                    params = json.loads(f.read())
+
         except FileNotFoundError:
             pass
 
@@ -72,12 +99,13 @@ class VR:
             self.rule_params = {}
 
 
-
         for (key, value) in base_params.items():
             if not isinstance(value, str):
                 exec(f"self.{key} = {value}")
             else:
                 exec(f"self.{key} = '{value}'")
+
+
 
         self.LEVEL_PATH = f"{BASE_PATH}/levels/{self.LEVEL_ID}/"
         self.TEXTURE_PATH = f"{BASE_PATH}/textures/"
@@ -155,20 +183,54 @@ class VR:
 
         for level_layer_index, layer in enumerate(self.LEVEL_LAYERS):
             for index, identifier in enumerate(BLOCK_IDENTIFIERS):
-                #blocks = np.where(np.all(layer == identifier, axis=-1))
-                blocks_ = np.all(layer == identifier, axis=-1)
+                block_matrix = np.all(layer == identifier, axis=-1)
+                blocks = np.array(np.where(block_matrix), dtype = int)
                 block_type = BLOCK_IDENTIFIERS_str[index]
+                h = w = 1
+                block_matrix = block_matrix.astype(int)
 
-                rects = rectangles.extract_rectangles(blocks_.astype(int))
-                for rect in rects:
-                    (y, x, h, w) = rect#cv2.boundingRect(contour)
+                #cluster:
+                #blocks_ = np.all(layer == identifier, axis=-1)
+                #rects = rectangles.extract_rectangles(blocks_.astype(int))
+
+                #for rect in rects:
+                #    (y, x, h, w) = rect
+
+                for block in np.arange(blocks.shape[1]):
+
+                    x, y = blocks[0][block], blocks[1][block]
+                    pattern = [
+                    block_matrix[x-1, y-1], block_matrix[x, y-1], block_matrix[x+1, y-1],
+                    block_matrix[x-1, y], block_matrix[x, y], block_matrix[x+1, y],
+                    block_matrix[x-1, y+1], block_matrix[x, y+1], block_matrix[x+1, y+1]
+                    ]
+                    x, y = blocks[1][block], blocks[0][block]
+
+
+                    scale_X = 1
+                    offset_X = offset_Y = 0
+
+                    if pattern in RIGHT_ANGLES:
+
+                        rotation = Vec3(0, 45, 0)
+                        scale_X = np.sqrt(2)
+                        offset_X = scale_X/4
+                        offset_Y = scale_X/4
+
+                    elif pattern in LEFT_ANGLES:
+
+                        rotation = Vec3(0, -45, 0)
+                        scale_X = np.sqrt(2)
+                        offset_X = scale_X/4
+                        offset_Y = scale_X/4
+                    else:
+                        rotation=Vec3(0,0,0)
 
                     if "floor" == block_type:
-                        e = Entity(model='cube',  scale = (self.FLOOR_SIZE[0] * w, self.FLOOR_SIZE[1], self.FLOOR_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.FLOOR_SIZE[1]/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+                        e = Entity(model='cube',  scale = (self.FLOOR_SIZE[0] * w, self.FLOOR_SIZE[1], self.FLOOR_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.FLOOR_SIZE[1]/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_,rotation=rotation)
                     elif "block" == block_type:
-                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
+                        e = Entity(model='cube',  scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_,rotation=rotation)
                     elif "grating" == block_type:
-
                         try:
                             grating_id = str((identifier[0] - 100)//10)
                             grating = self.GRATINGS[grating_id].elongate(max(h, w))
@@ -177,14 +239,7 @@ class VR:
 
                         texture = load_texture(name = grating[0], path = Path(grating[1]))
 
-                        e = Entity(model='cube', scale = (self.BLOCK_SIZE[0] * w, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_)
-
-                        #e.model.uvs=list(e.model.uvs)
-
-                        #e.model.uvs[10]=(.2,.2)
-
-                        #e.model.generate()
-
+                        e = Entity(model='cube', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2 + offset_X) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2 + offset_Y)), collider = 'box',shader=shader_,rotation=rotation)
 
 
 
@@ -194,13 +249,18 @@ class VR:
 
                     PLAYER.append(camera)
                     PLAYER[0].dx = PLAYER[0].dz = 0.
-                    PLAYER[0].position = (self.SCALAR * player[1], self.PLAYER_ELEVATION + self.SCALAR * level_layer_index * self.BLOCK_HEIGHT + self.GROUND_SIZE/2, self.SCALAR * player[0])
-                    PLAYER[0].collider = BoxCollider(PLAYER[0], center=Vec3(0, 0, .1), size=Vec3(.4, .1, .1))
-                    player_dir = np.where(np.all(layer == PLAYER_DIR_, axis=-1))
+                    if self.file == "default":
+                        camera.fov = 120
+                        PLAYER[0].position = (self.SCALAR * player[1], self.PLAYER_ELEVATION * 90 + self.SCALAR * self.BLOCK_HEIGHT + self.GROUND_SIZE/2, self.SCALAR * player[0] - 50)
+                        PLAYER[0].rotation = Vec3(35, 0, 0)
+                    else:
+                        PLAYER[0].position = (self.SCALAR * player[1], self.PLAYER_ELEVATION + self.SCALAR * level_layer_index * self.BLOCK_HEIGHT + self.GROUND_SIZE/2, self.SCALAR * player[0])
+                        PLAYER[0].collider = BoxCollider(PLAYER[0], center=Vec3(0, 0, .1), size=Vec3(.4, .1, .1))
+                        player_dir = np.where(np.all(layer == PLAYER_DIR_, axis=-1))
 
-                    if len(player_dir[0]) > 0:
-                        angle = np.degrees(-np.arctan2(player[0] - player_dir[0], player[1] - player_dir[1])) - 90
-                        PLAYER[0].rotation = Vec3(0, np.abs(angle), 0)
+                        if len(player_dir[0]) > 0:
+                            angle = np.degrees(-np.arctan2(player[0] - player_dir[0], player[1] - player_dir[1])) - 90
+                            PLAYER[0].rotation = Vec3(0, np.abs(angle), 0)
 
 
         for item_layer_index, layer in enumerate(self.LEVEL_LAYERS):
@@ -236,13 +296,28 @@ class VR:
 
         self.RULE_ENTITIES = tuple(self.RULE_ENTITIES)
 
+        self.set_sky()
+
 
         if SCREENSHOT:
             self.take_screenshots()
 
         LOGGER.start() #start logging
 
+    def set_sky(self):
+
+        self.SKY = tuple(self.SKY)
+        print(self.SKY_tx, self.SKY)
+        if self.SKY_tx == "None":
+
+            Sky(color = rgb(*self.SKY), texture = None)
+        else:
+            Sky(color = rgb(*self.SKY), texture = self.SKY_tx)
+
     def take_screenshots(self, delay = 1):
+        """
+        todo: improve this. Center on map
+        """
         saved_camera = camera.transform
         max_dim = max(self.LEVEL_SIZE)
 
@@ -261,7 +336,7 @@ class VR:
         invoke(Func(self.CAPTURE.snapshot), delay = 4*delay) #right
 
         invoke(setattr,camera,'rotation',Vec3(90,0,0),delay=5*delay)
-        invoke(setattr,camera,'y',100, delay=5*delay)
+        invoke(setattr,camera,'y',20, delay=5*delay)
         invoke(Func(self.CAPTURE.snapshot), delay = 6*delay) #top-down
 
         invoke(setattr,camera,'enabled',True, delay=7*delay)
@@ -270,29 +345,112 @@ class VR:
 
 
     def run(self):
-        app = Ursina()
+        app = Ursina(size=tuple(self.DIMENSIONS), title = "rodentVR")#fullscreen = (DEBUG == False))
         app.development_mode = DEBUG
+        window.title = "rodentVR"
         window.fps_counter.enabled = DEBUG
         window.exit_button.visible = DEBUG
-        window.borderless = DEBUG
+        window.borderless = True#DEBUG
         window.cog_button.enabled = DEBUG
+        window.position = Vec2(*tuple(self.MONITOR_position))
 
-        if not DEBUG:
-
-            window.windowed_size =window.size = self.SCREEN_DIMENSIONS
-            window.position = Vec2(
-                int(-1920),
-                int(0)
-                )
 
         camera.update=self.update
         camera.fov = self.FOV
         camera.orthographic = False
-        mouse.locked = True
+
         window.color = rgb(97,94,137)
 
+        scene.fog_density = self.FOG
+        scene.fog_color = rgb(*tuple(self.FOG_color))
+
+        pivot = Entity()
+        DirectionalLight(parent=pivot, shadows=True, rotation=(0, 0, 0))
+        AmbientLight(parent=pivot, shadows=True)
+
         self.generate_level()
+
+        if DEBUG == False:
+            camera.enabled=False
+            camera.overlay.color = color.white
+            texture=load_texture(name="splash.png", path=Path(self.TEXTURE_PATH))
+            texture.filtering = "mipmap"
+            logo = Sprite(name='splash', parent=camera.ui, texture=texture, world_z=camera.overlay.z-1, scale=.1)
+            #logo.animate_color(color.black, duration=.5, delay=2)
+            overlay = Sprite(parent=camera.ui, color=(0,0,0,0), world_z=camera.overlay.z-1, scale=99)
+            overlay.animate_color(color.black, duration=.5, delay=1.5)
+            camera.overlay.animate_color(color.black, duration=.5, delay=2.5)
+
+            destroy(overlay, delay=3.5)
+            destroy(logo, delay=3)
+            camera.overlay.animate_color(color.clear, duration=.5, delay=3.5)
+
+            invoke(self.load_experiment, delay=3)
+            invoke(setattr, camera,'color',color.clear, delay=4.5)
+            destroy(overlay, delay=4)
+            #mouse.locked = True
+            #invoke(setattr,camera,'enabled',True,delay=3)
+
         app.run()
+
+
+    def mute(self, b, theme):
+        print("okokoko",theme)
+        if theme.playing:
+            theme.stop()
+            b.text="<gray>Unmute"
+        else:
+            theme.play()
+            b.text="<gray>Mute"
+
+    def load_experiment(self):
+        #fb_parent = Entity(scale=(.5,.5))
+        theme = Audio(sound_file_name=f"{BASE_PATH}/misc/theme.mp3")
+        from panda3d.core import Filename
+
+        p = Filename.fromOsSpecific(f"{BASE_PATH}/misc/theme.mp3")
+        theme._clip = loader.loadSfx(p)
+        theme.volume=0
+        theme.play()
+        theme.fade_in(value=.05, duration=5)
+
+
+
+        b = Button(scale=(.1,.035), text='<gray>Mute', color=color.dark_gray, highlight_color=color.azure, position=(.8, .5-0.05))
+        b.on_click=Func(self.mute, b=b, theme=theme)
+        fb = FileBrowser(file_types = [RVREXT] )
+
+        fb.title_bar.text=f'<gray>Load experiment ({RVREXT})'
+        c=color._32
+        c[-1]=.8
+        fb.back_panel.color=c
+        fb.bg.gradient = Entity(model='quad', texture='vertical_gradient', color=color.white)
+        fb.cancel_button_2.visible =  fb.cancel_button.visible = fb.cancel_button_2.enabled =  fb.cancel_button.enabled = False
+
+        texture=load_texture(name="minisplash.png", path=Path(self.TEXTURE_PATH))
+        texture.filtering = "mipmap"
+        minilogo = Sprite(name='minisplash', parent=camera.ui, texture=texture, position=window.bottom,  scale=.08)
+
+        minilogo.y += (texture.height/window.size[1])/2
+
+        camera.animate("y", camera.y + 25, duration = 40, loop=True,curve=curve.linear_boomerang)
+
+        def on_submit(files):
+            for file in files:
+                blockPrint()
+                scene.clear()
+                enablePrint()
+
+                self.clear()
+                self.load_parameters(str(file))
+                self.load_level()
+                self.generate_level()
+
+
+                mouse.locked = True
+                camera.enabled = True
+
+        fb.on_submit = on_submit
 
     def update(self):
         LOGGER.update(camera.position)
@@ -341,11 +499,14 @@ class VR:
 
 def main():
     vr = VR()
-    vr.load_parameters("example_2")
+    vr.load_parameters("default")
     vr.load_level()
-
     vr.run()
+
+
+
     LOGGER.terminate()
 
 if __name__ == "__main__":
+
     main()

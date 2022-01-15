@@ -1,0 +1,15 @@
+{
+  "base":{
+    "LEVEL_ID":"example_2",
+    "SKY_tx": "None"
+  },
+
+  "blocks" : {
+    "3" : {
+      "type" : "sine",
+      "square" : true,
+      "sf"  : 3,
+      "angle" : 45
+    }
+  }
+}
