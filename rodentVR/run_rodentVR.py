@@ -21,7 +21,7 @@ todo:
 [ ] remember parameter-directory
 """
 
-DEBUG = False#True
+DEBUG = True
 
 SCREENSHOT = False#True
 
@@ -38,6 +38,8 @@ class VR:
     GROUND_SIZE = 1
 
     CAPTURE = None
+    e=[]
+    ind = 0
 
     def clear(self):
         self.LEVEL_LAYERS = []
@@ -181,6 +183,7 @@ class VR:
         ground_parent.model.generate()
 
 
+
         for level_layer_index, layer in enumerate(self.LEVEL_LAYERS):
             for index, identifier in enumerate(BLOCK_IDENTIFIERS):
                 block_matrix = np.all(layer == identifier, axis=-1)
@@ -204,27 +207,58 @@ class VR:
                     block_matrix[x-1, y], block_matrix[x, y], block_matrix[x+1, y],
                     block_matrix[x-1, y+1], block_matrix[x, y+1], block_matrix[x+1, y+1]
                     ]
+
                     x, y = blocks[1][block], blocks[0][block]
 
 
-                    scale_X = 1
+                    scale_X = scale_Y = 1
                     offset_X = offset_Y = 0
-
+                    """
+                    todo: fix. Use pythagorean theorem
+                    """
                     if pattern in RIGHT_ANGLES:
 
-                        rotation = Vec3(0, 45, 0)
-                        scale_X = np.sqrt(2)
-                        offset_X = scale_X/4
-                        offset_Y = scale_X/4
+                        rotation = Vec3(0, -45, 0)
+                        scale_Y = np.sqrt(2)
+                        #offset_X = -scale_Y/2.2
+                        #offset_Y = +scale_Y/4
 
                     elif pattern in LEFT_ANGLES:
 
                         rotation = Vec3(0, -45, 0)
                         scale_X = np.sqrt(2)
-                        offset_X = scale_X/4
-                        offset_Y = scale_X/4
+                        #offset_X = scale_X/2.2
+                        #offset_Y = +scale_X/4
+                        #offset_X = np.cos(np.radians(-45)) * scale_X #/4
+                        #offset_Y = np.sin(np.radians(-45)) * scale_X #scale_X/4
                     else:
                         rotation=Vec3(0,0,0)
+
+                    add = -1, -1
+                    #print(np.array(pattern).reshape((3,3)))
+                    print(np.array(pattern).reshape((3,3)))
+                    if pattern in RIGHT_END_ANGLES:
+                        add = x - 2 * w/self.SCALAR, y, .5, 1, 45
+                    elif pattern in LEFT_END_ANGLES:
+                        add = x + 2 * w/self.SCALAR, y, .5, 1, -45
+                    elif pattern in UP_END_ANGLES:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        #A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x +  .5 * w/self.SCALAR, y -  2 * h/self.SCALAR, a, 1, -np.degrees(A)
+                        print(np.degrees(A))
+                    elif pattern in UP_END_ANGLES2:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        #A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x -  .5 * w/self.SCALAR, y -  2 * h/self.SCALAR, a, 1, np.degrees(A)
+                        print(np.degrees(A))
+
+
 
                     if "floor" == block_type:
                         e = Entity(model='cube',  scale = (self.FLOOR_SIZE[0] * w, self.FLOOR_SIZE[1], self.FLOOR_SIZE[2] * h), color=rgb(*identifier), position = (self.SCALAR * (x + w/2 - 1/2), self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2 + self.FLOOR_SIZE[1]/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_,rotation=rotation)
@@ -239,8 +273,14 @@ class VR:
 
                         texture = load_texture(name = grating[0], path = Path(grating[1]))
 
-                        e = Entity(model='cube', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2 + offset_X) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2 + offset_Y)), collider = 'box',shader=shader_,rotation=rotation)
+                        e = Entity(model='cube', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h* scale_Y), color=color.white, texture = texture, position = (self.SCALAR * (x + w/2 - 1/2) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y + h/2 - 1/2)), collider = 'box',shader=shader_,rotation=rotation)
+                        if add[0] != -1:
+                            #rotation[1] /=2
+                            x, y, scale_X, scale_Y, rot = add
+                            rotation[1] = rot
+                            e = Entity(model='quad', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h * scale_Y), texture=texture, color=color.white, position = (self.SCALAR * (x + w/2 - 1/2) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y+ h/2 - 1/2 )), collider = 'box',shader=shader_,rotation=rotation)
 
+                            self.e.append(e)
 
 
             if len(PLAYER) == 0:
@@ -250,7 +290,7 @@ class VR:
                     PLAYER.append(camera)
                     PLAYER[0].dx = PLAYER[0].dz = 0.
                     if self.file == "default":
-                        camera.fov = 120
+
                         PLAYER[0].position = (self.SCALAR * player[1], self.PLAYER_ELEVATION * 90 + self.SCALAR * self.BLOCK_HEIGHT + self.GROUND_SIZE/2, self.SCALAR * player[0] - 50)
                         PLAYER[0].rotation = Vec3(35, 0, 0)
                     else:
@@ -353,9 +393,11 @@ class VR:
         window.borderless = True#DEBUG
         window.cog_button.enabled = DEBUG
         window.position = Vec2(*tuple(self.MONITOR_position))
+        #window.render_mode = 'wireframe'
 
 
         camera.update=self.update
+        camera.input = self.input
         camera.fov = self.FOV
         camera.orthographic = False
 
@@ -390,7 +432,10 @@ class VR:
             destroy(overlay, delay=4)
             #mouse.locked = True
             #invoke(setattr,camera,'enabled',True,delay=3)
-
+        else:
+            mouse.locked = True
+            camera.enabled = True
+            #camera.rotation=Vec3(30,20,0)
         app.run()
 
 
@@ -450,15 +495,43 @@ class VR:
                 mouse.locked = True
                 camera.enabled = True
 
+
         fb.on_submit = on_submit
+    def input(self, key):
+        if key == "z":
+            self.ind -= 1
+        elif key == "x":
+            self.ind += 1
 
     def update(self):
+        vel=.01
+        ind = self.ind
+        if held_keys['r']:
+            self.e[ind].x -=vel
+        elif held_keys['t']:
+            self.e[ind].x +=vel
+
+        if held_keys['f']:
+            self.e[ind].z -=vel
+        elif held_keys['g']:
+            self.e[ind].z +=vel
+
+        if held_keys['c']:
+            self.e[ind].scale_x -=vel
+        elif held_keys['v']:
+            self.e[ind].scale_x +=vel
+
+
+
+        print(self.e[ind].position, self.e[ind].scale, self.ind)
+
         LOGGER.update(camera.position)
 
         #print(np.cos(np.radians(-PLAYER[0].rotation[1]-90)), np.sin(np.radians(-PLAYER[0].rotation[1] +90)))
         #if PLAYER[0].rotation[1] != 90:
         PLAYER[0].z += PLAYER[0].dz
         PLAYER[0].x += PLAYER[0].dx
+
         #else:
         #    PLAYER[0].z -= PLAYER[0].dx
         #    PLAYER[0].x += PLAYER[0].dz
@@ -499,7 +572,7 @@ class VR:
 
 def main():
     vr = VR()
-    vr.load_parameters("default")
+    vr.load_parameters("example_2")#("default")
     vr.load_level()
     vr.run()
 

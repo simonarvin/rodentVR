@@ -1,3 +1,6 @@
+from panda3d.core import ConfigVariableString
+ConfigVariableString('audio-library-name', 'p3fmod_audio')
+
 import os
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -11,6 +14,7 @@ from rodentVR import logger
 LOGGER = logger.Logger(LOG_PATH)
 
 PLAYER = []
+RVREXT = '.json'
 
 RULE_INDEX = 0
 #item pixel codes
@@ -48,3 +52,121 @@ STOP_ = (255, 0, 0)
 
 RULE_IDENTIFIERS = [STOP_]
 RULES = ["stop"]
+
+
+RIGHT_ANGLES = [
+[
+0, 0, 1,
+0, 1, 0,
+0, 0, 0
+],
+[
+0, 0, 1,
+0, 1, 0,
+1, 0, 0
+],
+[
+0, 0, 0,
+0, 1, 0,
+1, 0, 0
+]
+]
+
+LEFT_ANGLES = [
+[
+1, 0, 0,
+0, 1, 0,
+0, 0, 0
+],
+[
+1, 0, 0,
+0, 1, 0,
+0, 0, 1
+],
+[
+0, 0, 0,
+0, 1, 0,
+0, 0, 1
+]
+]
+
+DOWN_END_ANGLES = [
+[
+0, 1, 0,
+0, 1, 0,
+0, 0, 1
+],
+[
+0, 1, 0,
+0, 1, 0,
+1, 0, 0
+]]
+
+UP_END_ANGLES = [
+[
+0, 0, 1,
+0, 1, 0,
+0, 1, 0
+],
+[
+1, 0, 0,
+0, 1, 0,
+0, 1, 0
+],
+[
+1, 0, 0,
+0, 1, 1,
+0, 0, 0
+]
+]
+UP_END_ANGLES2 = [
+[
+0, 0, 0,
+0, 1, 1,
+1, 0, 0
+]
+]
+
+RIGHT_END_ANGLES = [
+[
+0, 0, 1,
+1, 1, 0,
+0, 0, 0
+]
+]
+
+"""
+[
+0, 0, 0,
+1, 1, 0,
+0, 0, 1
+]
+"""
+
+LEFT_END_ANGLES = [
+[
+0, 0, 0,
+1, 1, 0,
+0, 0, 1
+]
+]
+"""
+[
+1, 0, 0,
+0, 1, 1,
+0, 0, 0
+],
+[
+0, 0, 0,
+0, 1, 1,
+1, 0, 0
+]
+]"""
+
+import sys, os
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
