@@ -19,6 +19,8 @@ from pathlib import Path
 todo:
 [ ] add mute-buttom (and remember)
 [ ] remember parameter-directory
+[X] END_ANGLES1 og 2.
+[ ] Scaling af textures ved vinklet vægge
 """
 
 DEBUG = True
@@ -235,12 +237,31 @@ class VR:
                         rotation=Vec3(0,0,0)
 
                     add = -1, -1
+                    add2=-1,-1
                     #print(np.array(pattern).reshape((3,3)))
                     print(np.array(pattern).reshape((3,3)))
                     if pattern in RIGHT_END_ANGLES:
                         add = x - 2 * w/self.SCALAR, y, .5, 1, 45
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        #A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+
+                        add2 = x + .5 * w/self.SCALAR, y +  2 * h/self.SCALAR, a, 1, -45-np.degrees(A) # du skal bruge cosine igen
+
+
                     elif pattern in LEFT_END_ANGLES:
                         add = x + 2 * w/self.SCALAR, y, .5, 1, -45
+
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        #A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+
+                        add2 = x - .5 * w/self.SCALAR, y +  2 * h/self.SCALAR, a, 1, 45+np.degrees(A) # du skal bruge cosine igen
+
                     elif pattern in UP_END_ANGLES:
                         b, c = 1, 1/2
                         a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
@@ -248,7 +269,8 @@ class VR:
                         #A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
                         A=np.arccos((a**2+b**2-c**2)/(2*a*b))
                         add = x +  .5 * w/self.SCALAR, y -  2 * h/self.SCALAR, a, 1, -np.degrees(A)
-                        print(np.degrees(A))
+                        add2 = x -  2 * w/self.SCALAR, y +  .5 * h/self.SCALAR, a, 1, 90+np.degrees(A)
+
                     elif pattern in UP_END_ANGLES2:
                         b, c = 1, 1/2
                         a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
@@ -256,7 +278,42 @@ class VR:
                         #A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
                         A=np.arccos((a**2+b**2-c**2)/(2*a*b))
                         add = x -  .5 * w/self.SCALAR, y -  2 * h/self.SCALAR, a, 1, np.degrees(A)
-                        print(np.degrees(A))
+                        add2 = x +  2 * w/self.SCALAR, y +  .5 * h/self.SCALAR, a, 1, -90-np.degrees(A)
+
+                    elif pattern in DOWN_END_ANGLES:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        #A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x +  2 * w/self.SCALAR, y -  .5 * h/self.SCALAR, a, 1, 45 - np.degrees(A)
+                        add2 = x -  .5 * w/self.SCALAR, y + 2 * h/self.SCALAR, a, 1, 45 + np.degrees(A)
+
+                    elif pattern in DOWN_END_ANGLES2:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        #A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x -  2 * w/self.SCALAR, y -  .5 * h/self.SCALAR, a, 1, -45 + np.degrees(A)
+                        add2 = x +  .5 * w/self.SCALAR, y + 2 * h/self.SCALAR, a, 1, -45 - np.degrees(A)
+                    elif pattern in END_ANGLES:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        #A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x -  3 * w/self.SCALAR, y -  .5 * h/self.SCALAR, a, 1, -45 + np.degrees(A)
+                        add2 = x +  .5 * w/self.SCALAR, y + 2 * h/self.SCALAR, a, 1, -45 - np.degrees(A)
+
+                    elif pattern in END_ANGLES2:
+                        b, c = 1, 1/2
+                        a=np.sqrt(b**2 + c**2 - 2*b*c * np.cos(np.radians(45)))
+                        #A = np.arccos(np.radians((b**2 + c**2-a**2)/(2*b*c)))
+                        #A= np.arccos((a**2 + c**2 - b**2)/(2*a*c))
+                        A=np.arccos((a**2+b**2-c**2)/(2*a*b))
+                        add = x -  .5 * w/self.SCALAR, y -2 * h/self.SCALAR, a, 1,  np.degrees(A)
+                        add2 = x +  2 * w/self.SCALAR, y + .5 * h/self.SCALAR, a, 1, -90- np.degrees(A)
 
 
 
@@ -277,9 +334,15 @@ class VR:
                         if add[0] != -1:
                             #rotation[1] /=2
                             x, y, scale_X, scale_Y, rot = add
+
                             rotation[1] = rot
                             e = Entity(model='quad', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h * scale_Y), texture=texture, color=color.white, position = (self.SCALAR * (x + w/2 - 1/2) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y+ h/2 - 1/2 )), collider = 'box',shader=shader_,rotation=rotation)
-
+                            try:
+                                x, y, scale_X, scale_Y, rot = add2
+                                rotation[1] = rot
+                                e = Entity(model='quad', scale = (self.BLOCK_SIZE[0] * w * scale_X, self.BLOCK_SIZE[1], self.BLOCK_SIZE[2] * h * scale_Y), texture=texture, color=color.white, position = (self.SCALAR * (x + w/2 - 1/2) , self.SCALAR * level_layer_index * self.BLOCK_HEIGHT+ self.GROUND_SIZE/2+ self.SCALAR *self.BLOCK_HEIGHT/2, self.SCALAR * (y+ h/2 - 1/2 )), collider = 'box',shader=shader_,rotation=rotation)
+                            except:
+                                pass
                             self.e.append(e)
 
 
@@ -297,6 +360,7 @@ class VR:
                         PLAYER[0].position = (self.SCALAR * player[1], self.PLAYER_ELEVATION + self.SCALAR * level_layer_index * self.BLOCK_HEIGHT + self.GROUND_SIZE/2, self.SCALAR * player[0])
                         PLAYER[0].collider = BoxCollider(PLAYER[0], center=Vec3(0, 0, .1), size=Vec3(.4, .1, .1))
                         player_dir = np.where(np.all(layer == PLAYER_DIR_, axis=-1))
+                        #PLAYER[0].rotation = Vec3(0, 180, 0)
 
                         if len(player_dir[0]) > 0:
                             angle = np.degrees(-np.arctan2(player[0] - player_dir[0], player[1] - player_dir[1])) - 90
@@ -524,6 +588,13 @@ class VR:
 
 
         print(self.e[ind].position, self.e[ind].scale, self.ind)
+
+
+        if held_keys['a']:
+            PLAYER[0].rotation_y-=1
+        elif held_keys['s']:
+            PLAYER[0].rotation_y+=1
+
 
         LOGGER.update(camera.position)
 
